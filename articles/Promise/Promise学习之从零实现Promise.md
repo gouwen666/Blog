@@ -35,9 +35,9 @@
     }
 ```
 
-### Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`
+### 实现构造函数
 
-于是我们定义常量：
+Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`，于是我们定义常量如下：
 
 ```js
     const PENDING = 'pending'
@@ -48,7 +48,7 @@
     }
 ```
 
-** resolve方法能够将状态由pending转为fulfilled，这个 `转换` 是 `异步` 的；并且它能够 `拆解` promise对象，这个拆解过程也是异步的。 **
+resolve方法能够将状态由pending转为fulfilled，这个 `转换` 是 `异步` 的；并且它能够 `拆解` promise对象，这个拆解过程也是异步的。
 
 ```js
     const PENDING = 'pending'
@@ -71,7 +71,7 @@
     }
 ```
 
-** catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。 **
+catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。
 
 ```js
     const PENDING = 'pending'
