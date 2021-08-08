@@ -301,7 +301,7 @@ catch方法能够将pending转为rejected，这个 `转换` 也是 `异步` 的�
 
 到这里，我们已经实现了一个基本的Promise，我们整合一下代码：
 
-[promise.js]('./promise.new.js')
+[promise.js]('https://github.com/gouwen666/Blog/blob/master/articles/Promise/promise.new.js')
 
 
 
