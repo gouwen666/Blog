@@ -15,7 +15,7 @@
 ```js
     class Promise {
         //构造方法
-        constuctor(fn) {}
+        constructor() {}
         
         //函数参数接收的resolve方法
         _resolve() {}
@@ -26,8 +26,6 @@
         then() {}
 
         catch() {}
-
-        finally() {}
 
         static resolve() {}
 
@@ -48,14 +46,25 @@ Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`，于�
     }
 ```
 
-resolve方法能够将状态由pending转为fulfilled，这个 `转换` 是 `异步` 的；并且它能够 `拆解` promise对象，这个拆解过程也是异步的。
+resolve方法能够将状态由pending转为fulfilled，这个 `转换` 是 `异步` 的；并且它能够 `拆解` promise对象，这个过程也是异步的；状态变更之后，将收集到的所有方法处理掉。我们实现如下：
 
 ```js
     const PENDING = 'pending'
     const REJECTED = 'rejected'
     const FULFILLED = 'fulfilled'
     class Promise {
-        ...
+        constructor(executor) {
+            ...
+            this._status = PENDING;
+            this._value = undefined;
+            this.onFulfilledList = [];
+            ...
+            try{
+                executor(this._resolve, this._reject);
+            }catch(e) {
+                this._reject(e);
+            }
+        }
         _resolve(value) {
             if (value instanceof Promise) {
                 value.then(val => {
@@ -65,24 +74,40 @@ resolve方法能够将状态由pending转为fulfilled，这个 `转换` 是 `异
                 setTimeout(() => {
                     this._status = FULFILLED;
                     this._value = value;
+                    this.onFulfilledList.forEach(fn => fn(this._value));
+                    this.onFulfilledList = [];
                 });
             }
         }
+        ...
     }
 ```
 
-catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。
+catch方法能够将pending转为rejected，这个 `转换` 也是 `异步` 的；状态变更之后，将收集到的所有方法处理掉。实现如下：
 
 ```js
     const PENDING = 'pending'
     const REJECTED = 'rejected'
     const FULFILLED = 'fulfilled'
     class Promise {
-        ...
+        constructor(executor) {
+            ...
+            this._status = PENDING;
+            this._reason = undefined;
+            this.onRejectedList = [];
+            ...
+            try{
+                executor(this._resolve, this._reject);
+            }catch(e) {
+                this._reject(e);
+            }
+        }
         _reject(reason) {
             setTimeout(() => {
                 this._status = REJECTED;
                 this._reason = reason;
+                this.onRejectedList.forEach(fn => fn(this._reason));
+                this.onRejectedList = [];
             })
         }
     }
@@ -90,11 +115,12 @@ catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。
 
 ### 实现then方法
 
-先分析要点：
+先分析一下要点：
 
 + 当状态为pending时，then的onFulfilled函数和onRejected函数会被收集；
 + 当状态为fulfilled时，收集到的所有onFulfilled函数会被调用；
 + 当状态为rejected时，收集到的所有onRejected函数会被调用；
++ 返回一个状态为fulfilled的promise对象，值为return出来的结果；
 
 ```js
     const PENDING = 'pending'
@@ -110,13 +136,89 @@ catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。
         }
 
         then(onFulfilled, onRejected) {
-            if(this._status === PENDING) {
-                onFulfilled && this.onFulfilledList.push(onFulfilled);
-                onRejected && this.onRejectedList.push(onRejected);
-            }else if(this._status === FULFILLED) {
-                onFulfilled && onFulfilled(this._value);
-            }else if(this._status === REJECTED) {
-                onRejected && onRejected(this._reason);
+            return new Promise((resolve, reject) => {
+                if(this._status === PENDING) {
+                    onFulfilled && this.onFulfilledList.push((v) => {
+                        try {
+                            let val = onFulfilled(v);
+                            resolve(val);
+                        }catch(e) {
+                            reject(e);
+                        }
+                    });
+                    onRejected && this.onRejectedList.push((v) => {
+                        try {
+                            let val = onRejected(v);
+                            resolve(val);
+                        }catch(e) {
+                            reject(e);
+                        }
+                    });
+                }else if(this._status === FULFILLED) {
+                    try {
+                        onFulfilled && (let val = onFulfilled(this._value));
+                        resolve(val);
+                    }catch(e) {
+                        reject(e);
+                    }
+                }else if(this._status === REJECTED) {
+                    try {
+                        onRejected && (let val = onRejected(this._reason));
+                        resolve(val);
+                    }catch(e) {
+                        reject(e);
+                    }
+                }
+            });
+        }
+    }
+```
+
+貌似重复逻辑有点多，我们优化一下：
+
+```js
+    const PENDING = 'pending'
+    const REJECTED = 'rejected'
+    const FULFILLED = 'fulfilled'
+
+    class Promise {
+        constructor() {
+            ...
+            this.onFulfilledList = [];
+            this.onRejectedList = [];
+            ...
+        }
+
+        then(onFulfilled, onRejected) {
+            return new Promise((resolve, reject) => {
+                if(this._status === PENDING) {
+                    if(onFulfilled) {
+                        this.onFulfilledList.push((val) => {
+                            this._resolvePromise(val, onFulfilled, resolve, reject);
+                        });
+                    }
+                    if(onRejected) {
+                        this.onRejectedList.push((val) => {
+                            this._resolvePromise(val, onRejected, resolve, reject);
+                        });
+                    }
+                }else if(this._status === FULFILLED) {
+                    if(onFulfilled) {
+                        this._resolvePromise(this._value, onFulfilled, resolve, reject);
+                    }
+                }else if(this._status === REJECTED) {
+                    if(onRejected) {
+                        this._resolvePromise(this._reason, onRejected, resolve, reject);
+                    }
+                }
+            });
+        }
+
+        _resolvePromise(val, callback, resolve, reject) {
+            try {
+                resolve(callback(val));
+            }catch(e) {
+                reject(e);
             }
         }
     }
@@ -139,14 +241,69 @@ catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。
         }
 
         catch(onRejected) {
-            if(this._status === PENDING) {
-                onRejected && onRejected(this._reason);
-            }else if(this._status === REJECTED) {
-                onRejected && onRejected(this._reason);
+            return new Promise((resolve, reject) => {
+                if(this._status === PENDING) {
+                    if(onRejected) {
+                        this.onRejectedList.push((val) => {
+                            this._resolvePromise(val, onRejected, resolve, reject);
+                        });
+                    }
+                }else if(this._status === REJECTED) {
+                    if(onRejected) {
+                        this._resolvePromise(this._reason, onRejected, resolve, reject);
+                    }
+                }
+            })
+        }
+
+        _resolvePromise(val, callback, resolve, reject) {
+            try {
+                resolve(callback(val));
+            }catch(e) {
+                reject(e);
             }
         }
     }
 ```
+
+### 实现静态方法resolve
+
+分析特点：
+
++ 如果参数是promise，返回该promise
++ 如果参数不是promise，返回新的fulfilled状态的promise，值为该参数
+
+```js
+    class Promise {
+        ...
+        static resolve(value) {
+            if(value instanceof Promise) {
+                return value;
+            }else {
+                return new Promise(resolve => resolve(value))
+            }
+        }
+    }
+```
+
+### 实现静态方法reject
+
+不管参数是什么，都会返回一个新的rejected状态的promise
+
+```js
+    class Promise {
+        ...
+        static reject(reason) {
+            return new Promise((resolve, reject) => reject(reason));
+        }
+    }
+```
+
+到这里，我们已经实现了一个基本的Promise，我们整合一下代码：
+
+[promise.js]('./promise.new.js')
+
+
 
 
 
