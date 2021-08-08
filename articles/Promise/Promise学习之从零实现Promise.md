@@ -30,6 +30,8 @@
         static resolve() {}
 
         static reject() {}
+
+        static all() {}
     }
 ```
 
@@ -299,7 +301,54 @@ catch方法能够将pending转为rejected，这个 `转换` 也是 `异步` 的�
     }
 ```
 
-到这里，我们已经实现了一个基本的Promise，我们整合一下代码：
+### 实现静态方法all
+
+当所有的promise都成功，状态才会变成fulfilled；只要有一个报错，状态会立即变成rejected。
+
+```js
+    class Promise {
+        ...
+        static all(promises) {
+            return new Promise((resolve, reject) => {
+                let count = 0;
+                let ret = [];
+                promises.forEach((promise, index) => {
+                    promise.then(res => {
+                        ret[index] = res;
+                        if(++count === promises.length) {
+                            resolve(ret);
+                        }
+                    }, err => {
+                        reject(err);
+                    })
+                });
+            });
+        }
+    }
+```
+
+### 实现静态方法race
+
+```js
+    class Promise {
+        ...
+        static race(promises) {
+            return new Promise((resolve, reject) => {
+                promises.forEach((promise, index) => {
+                    promise.then(res => {
+                        resolve(res);
+                    }, err => {
+                        reject(err);
+                    })
+                });
+            });
+        }
+    }
+```
+
+### 最后
+
+到这里，我们已经实现了一个基本的Promise，整理一下代码，如下：
 
 ```js
 const PENDING = 'pending';
@@ -405,6 +454,35 @@ class Promise {
 
     static reject(reason) {
         return new Promise((resolve, reject) => reject(reason));
+    }
+
+    static all(promises) {
+        return new Promise((resolve, reject) => {
+            let count = 0;
+            let ret = [];
+            promises.forEach((promise, index) => {
+                promise.then(res => {
+                    ret[index] = res;
+                    if(++count === promises.length) {
+                        resolve(ret);
+                    }
+                }, err => {
+                    reject(err);
+                })
+            });
+        });
+    }
+
+    static race(promises) {
+        return new Promise((resolve, reject) => {
+            promises.forEach((promise, index) => {
+                promise.then(res => {
+                    resolve(res);
+                }, err => {
+                    reject(err);
+                })
+            });
+        });
     }
 }
 ```
