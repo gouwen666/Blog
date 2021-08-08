@@ -35,33 +35,55 @@
     }
 ```
 
-Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`；当状态发生变更时，都会保存相应的结果：
+### Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`
+
+于是我们定义常量：
 
 ```js
     const PENDING = 'pending'
     const REJECTED = 'rejected'
     const FULFILLED = 'fulfilled'
-
     class Promise {
-        constuctor(fn) {
-            this._status = PENDING;
-            this._value = undefined;
-            this._reason = undefined;
-            try {
-                fn(this._resolve, this._reject);
-            }catch(e) {
-                this._reject();
+        ...
+    }
+```
+
+** resolve方法能够将状态由pending转为fulfilled，这个 `转换` 是 `异步` 的；并且它能够 `拆解` promise对象，这个拆解过程也是异步的。 **
+
+```js
+    const PENDING = 'pending'
+    const REJECTED = 'rejected'
+    const FULFILLED = 'fulfilled'
+    class Promise {
+        ...
+        _resolve(value) {
+            if (value instanceof Promise) {
+                value.then(val => {
+                    this._resolve(val);
+                });
+            }else {
+                setTimeout(() => {
+                    this._status = FULFILLED;
+                    this._value = value;
+                });
             }
         }
-        
-        _resolve(value) {
-            this._status = FULFILLED;
-            this._value = value;
-        }
+    }
+```
 
+** catch方法能够将pending转为rejected，这个 `转换` 为 `异步` 的。 **
+
+```js
+    const PENDING = 'pending'
+    const REJECTED = 'rejected'
+    const FULFILLED = 'fulfilled'
+    class Promise {
+        ...
         _reject(reason) {
-            this._status = REJECTED;
-            this._reason = reason;
+            setTimeout(() => {
+                this._status = REJECTED;
+                this._reason = reason;
+            })
         }
     }
 ```
@@ -100,7 +122,9 @@ Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`；当�
     }
 ```
 
-同理实现catch：
+### 实现catch
+
+和then的思路一样，我们继续实现catch：
 
 ```js
     const PENDING = 'pending'
@@ -123,6 +147,7 @@ Promise存在3种状态，分别是`pending`、`fullfilled`、`rejected`；当�
         }
     }
 ```
+
 
 
 
