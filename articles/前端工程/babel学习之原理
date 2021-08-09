@@ -1,0 +1,36 @@
+# babel原理
+
+## 什么是babel
+
+> Babel 是一个 JavaScript 编译器。
+
+这意味着开发人员可以使用 `下一代语法` 进行编程，而不用考虑浏览器对语法的支持情况。
+
+## 抽象语法树
+
+> 抽象语法树（AST），是源代码的抽象语法结构的树状表现形式。
+
+从定义中我们可以到，AST是用来描述编程语言语法结构的，这种描述是通过树的数据结构来完成的。所以，学习AST的相关知识，有助于我们更好的了解javascript这门语言。
+
+前端社区中已经有了AST树结构的非官方规范-[estree](https://github.com/estree/estree)，这个规范比较宏观地定义了语法的的结构，并没有跟细致地划分和定义。所以babel基于estree进行了修改，修改后的规范看[这里](https://github.com/babel/babylon/blob/master/ast/spec.md)。
+
+这里提供两个小工具，可以在线看到编译后的语法树：
+
++ [astexplorer](https://astexplorer.net/)
++ [esprima](https://esprima.org/demo/parse.html)
+
+如果想要深入学习AST，学习和记忆 `estree` 和 `estree修改版` 是必不可少的步骤。
+
+## 核心库
+
+### babylon
+
+[仓库地址](https://github.com/babel/babylon)
+
+
+
+
+
+
+
+
