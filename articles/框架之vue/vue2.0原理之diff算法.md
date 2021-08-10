@@ -12,11 +12,13 @@
 
 ![组件树](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-component-tree.png)
 
-** 虚拟DOM树 **   
+** 虚拟DOM树 **  
+
+![虚拟DOM树](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-vnode-tree.png)
 
 ** 真实DOM树 **
 
-
+![真实DOM树](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-dom-tree.png)
 
 
 https://segmentfault.com/a/1190000008782928
