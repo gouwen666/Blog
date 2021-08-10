@@ -8,11 +8,11 @@
 + 按照虚拟DOM分类 - 虚拟DOM树
 + 按照真实DOM分类 - 真实DOM树
 
-** 组件树 **
+**组件树**
 
-![组件树](https://github.com/mqyqingfeng/Blog/raw/master/images/vue2.0-component-tree.png)
+![组件树](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-component-tree.png)
 
-** 虚拟DOM树 **
+** 虚拟DOM树 **   
 
 ** 真实DOM树 **
 
