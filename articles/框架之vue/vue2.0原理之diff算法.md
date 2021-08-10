@@ -183,24 +183,24 @@ function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly
     }
 
     while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
-        if (isUndef(oldStartVnode)) {
+        if (isUndef(oldStartVnode)) { //条件1
             oldStartVnode = oldCh[++oldStartIdx]; // Vnode has been moved left
-        } else if (isUndef(oldEndVnode)) {
+        } else if (isUndef(oldEndVnode)) { //条件2
             oldEndVnode = oldCh[--oldEndIdx];
-        } else if (sameVnode(oldStartVnode, newStartVnode)) {
+        } else if (sameVnode(oldStartVnode, newStartVnode)) { //条件3
             patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
             oldStartVnode = oldCh[++oldStartIdx];
             newStartVnode = newCh[++newStartIdx];
-        } else if (sameVnode(oldEndVnode, newEndVnode)) {
+        } else if (sameVnode(oldEndVnode, newEndVnode)) { //条件4
             patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
             oldEndVnode = oldCh[--oldEndIdx];
             newEndVnode = newCh[--newEndIdx];
-        } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+        } else if (sameVnode(oldStartVnode, newEndVnode)) { //条件5
             patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue, newCh, newEndIdx);
             canMove && nodeOps.insertBefore(parentElm, oldStartVnode.elm, nodeOps.nextSibling(oldEndVnode.elm));
             oldStartVnode = oldCh[++oldStartIdx];
             newEndVnode = newCh[--newEndIdx];
-        } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+        } else if (sameVnode(oldEndVnode, newStartVnode)) { //条件6
             patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
             canMove && nodeOps.insertBefore(parentElm, oldEndVnode.elm, oldStartVnode.elm);
             oldEndVnode = oldCh[--oldEndIdx];
@@ -240,7 +240,10 @@ function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly
 
 #### 举一个涵盖所有比较的例子
 
-oldvode.children = `['a', 'b', 'c', 'd']`
+oldVode.children = `['a', 'b', 'c', 'd']`
+newVode.children = `['a', 'e', 'c', 'd', 'b', 'f']`
+
+
 
 
 
