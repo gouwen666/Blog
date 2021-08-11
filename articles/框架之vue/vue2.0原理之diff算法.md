@@ -212,25 +212,25 @@ function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly
             idxInOld = isDef(newStartVnode.key)
                 ? oldKeyToIdx[newStartVnode.key]
                 : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);
-            if (isUndef(idxInOld)) { // New element
+            if (isUndef(idxInOld)) { //条件7
                 createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
             } else {
                 vnodeToMove = oldCh[idxInOld];
-                if (sameVnode(vnodeToMove, newStartVnode)) {
+                if (sameVnode(vnodeToMove, newStartVnode)) { //条件8
                     patchVnode(vnodeToMove, newStartVnode, insertedVnodeQueue, newCh, newStartIdx);
                     oldCh[idxInOld] = undefined;
                     canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm);
-                } else {
+                } else { //条件9
                     createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
                 }
             }
             newStartVnode = newCh[++newStartIdx];
         }
     }
-    if (oldStartIdx > oldEndIdx) {
+    if (oldStartIdx > oldEndIdx) { //条件10
         refElm = isUndef(newCh[newEndIdx + 1]) ? null : newCh[newEndIdx + 1].elm;
         addVnodes(parentElm, refElm, newCh, newStartIdx, newEndIdx, insertedVnodeQueue);
-    } else if (newStartIdx > newEndIdx) {
+    } else if (newStartIdx > newEndIdx) { //条件11
         removeVnodes(oldCh, oldStartIdx, oldEndIdx);
     }
 }
@@ -243,8 +243,23 @@ function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly
 oldVode.children = `['a', 'b', 'c', 'd']`
 newVode.children = `['a', 'e', 'c', 'd', 'b', 'f']`
 
+![快照1](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot1.png)
 
+符合“条件3”，真实dom不进行任何变动，两个左指针都右移。之后展示如下：
 
+![快照2](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot2.png)
+
+符合“条件7”，创建新的真实dom，并插入到旧节点的开始指针之前：
+
+![快照3](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot3.png)
+
+符合“条件8”，旧节点的相应dom前移，图解如下：
+
+![快照4](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot4.png)
+
+符合“条件10”，旧节点的相应dom前移，图解如下：
+
+![快照5](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot5.png)
 
 
 https://segmentfault.com/a/1190000008782928
