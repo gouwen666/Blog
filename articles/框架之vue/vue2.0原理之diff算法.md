@@ -2,11 +2,11 @@
 
 ## 前言
 
-diff算法是vue性能优秀的策略之一，所以对diff算法的学习既能够帮助我们深入vue，也能让我们更高效地使用框架，发挥其最大价值。
+vue框架对于diff算法的设计是其性能优秀的原因之一，所以对于diff算法的学习能够帮助我们更高效地使用框架，发挥其最大价值。如果将来某一天遇到同样的树问题，我们也能使用同样的策略来优化树结构的处理。
 
 ## vue中的数据结构
 
-完整的vue应用是由多种树嵌套而成：
+一个完整的vue应用是由 `多种树` 嵌套而成：
 
 + 按照组件分类 - 组件树
 + 按照虚拟DOM分类 - 虚拟DOM树
@@ -32,13 +32,15 @@ diff算法是vue性能优秀的策略之一，所以对diff算法的学习既能
 
 1. 每个组件都有着自己的一颗虚拟DOM树；
 2. 子组件相对于父组件而言，它既是组件树的组件节点，又是父组件的虚拟DOM树的虚拟dom节点的组件实例componentInstance
-3. diff算法只会发生在受影响的虚拟DOM树中（局部）
+3. diff算法只会发生在受影响的虚拟DOM树（局部）中，并非是整个虚拟DOM树。
 
 ## diff源码
 
-### 启动组件diff
+我们从响应式数据发生变更开始，按照代码的执行顺序一步一步去分析。
 
-响应式数据发生变更时，会执行vm._update的执行：
+### 数据发生变更
+
+响应式数据发生变更时，会执行vm._update的执行。此时的vm是vue应用中某个组件的实例，这也证明了其是局部diff的，而非整体diff。
 
 ```js
 Vue.prototype._update = function (vnode, hydrating) {
@@ -58,7 +60,9 @@ Vue.prototype._update = function (vnode, hydrating) {
 
 ### sameVnode
 
-在此之前，我们需要先学习一下vue关于vnode相等的判断条件，判断的严格性将影响diff的效率，vue的设计很好的把握了这个度。
+在此之前，我们先学习一下vue关于vnode相等的判断条件，判断的严格性将影响diff的效率，vue很好地把握了这个度。
+
+这也是vue设计diff的策略之一：**适当的判等条件能够减少diff的执行次数**。
 
 ```js
     ...
@@ -83,7 +87,7 @@ Vue.prototype._update = function (vnode, hydrating) {
 
 ### patch
 
-上述的__patch__方法和patch方法是同一个，我们看看patch的关键代码：
+上述的__patch__方法和patch方法是同一个方法，我们看看patch的关键代码：
 
 ```js
     ...
@@ -150,13 +154,13 @@ Vue.prototype._update = function (vnode, hydrating) {
 
 vnode的diff有两个维度：是否有文本、是否有子节点
 
-大概整理了以下情况：
+整理如下：
 
 | oldVnode | vnode | 处理 |
 | :----: | :----: | :----: |
 | 有文本 | 无文本 | 清空文本 |
 | 有文本 | 有文本 | 比较不同后，更新文本 |
-| 有子节点 | 有子节点 | updateChildren子节点 |
+| 有子节点 | 有子节点 | 通过updateChildren更新子节点 |
 | 有子节点 | 无子节点 | 删除子节点对应的真实dom |
 | 无子节点 | 有子节点 | 渲染子节点成真实dom后挂载到el上 |
 
@@ -243,23 +247,53 @@ function updateChildren (parentElm, oldCh, newCh, insertedVnodeQueue, removeOnly
 oldVode.children = `['a', 'b', 'c', 'd']`
 newVode.children = `['a', 'e', 'c', 'd', 'b', 'f']`
 
+为了避免繁琐的文字描述，提前声明一些简称：
+
+| 简称 | 描述 |
+| :----: | :----: |
+| oldStartVnode | 旧子节点上开始指针指向的节点 |
+| oldEndVnode | 旧子节点上结束指针指向的节点 |
+| newStartVnode | 新子节点上开始指针指向的节点 |
+| newEndVnode | 新子节点上结束指针指向的节点 |
+| oldStartDom | 旧子节点上开始指针指向的节点对应的真实dom |
+| oldEndDom | 旧子节点上结束指针指向的节点对应的真实dom |
+| newStartDom | 新子节点上开始指针指向的节点对应的真实dom |
+| newEndDom | 新子节点上结束指针指向的节点对应的真实dom |
+
+
+子节点启动diff前的快照是这样子的：
+
 ![快照1](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot1.png)
 
-符合“条件3”，真实dom不进行任何变动，两个左指针都右移。之后展示如下：
+1. 当前快照符合“条件3”：oldStartVnode和newStartVnode相同，意味着当前位置的dom没有任何变动，只需要将oldStartVnode和newStartVnode右移一个位置，移动后快照如下：
 
 ![快照2](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot2.png)
 
-符合“条件7”，创建新的真实dom，并插入到旧节点的开始指针之前：
+2. 当前快照符合“条件7”：newStartVnode在旧树上没有找到，意味着newStartDom是新节点，于是创建新的真实dom，并插入到oldEndVnode之前，同时将newStartVnode右移一个位置。变动后快照如下：
 
 ![快照3](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot3.png)
 
-符合“条件8”，旧节点的相应dom前移，图解如下：
+3. 当前快照符合“条件8”：，newStartVnode在旧树上能够找到相同的节点，意味着只是顺序发生了变化，则将newStartDom从原来的位置移动到当前位置，同时将newStartVnode右移一个位置：
 
 ![快照4](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot4.png)
 
-符合“条件10”，旧节点的相应dom前移，图解如下：
+4. 当前快照符合“条件6”：newStartVnode和oldEndVnode相同，意味着oldEndDom位置发生了变化，则将oldEndDom从原来的位置移动到oldStartDom之前，图示如下：
 
 ![快照5](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot5.png)
+
+5. 当前快照符合“条件2”：在3步处理时，c已经被处理过，并且被置为空，所以直接将oldEndVnode左移
+
+![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot6.png)
+
+6. 当前快照符合“条件3”：真实dom不需要处理，只需将oldStartVnode和newStartVnode右移一个位置。
+
+![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot7.png)
+
+7. 因为oldStartVnode超过 oldEndVnode，则退出循环。此时新的子节点还有剩余，则创建其真实dom，添加到真实dom树上。
+
+![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot8.png)
+
+
 
 
 https://segmentfault.com/a/1190000008782928
