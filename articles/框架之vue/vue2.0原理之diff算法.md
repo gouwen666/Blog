@@ -289,13 +289,20 @@ newVode.children = `['a', 'e', 'c', 'd', 'b', 'f']`
 
 ![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot7.png)
 
-7. 因为oldStartVnode超过 oldEndVnode，则退出循环。此时新的子节点还有剩余，则创建其真实dom，添加到真实dom树上。
+7. 因为oldStartVnode超过 oldEndVnode，则退出循环。此时新的子节点还有剩余，则创建其真实dom，添加到dom树上。
 
 ![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot8.png)
 
 
+在以上的每一步中，一旦节点相同，还会调用 `patchVnode` 方法，递归去比较新旧相等的两个节点。
 
 
-https://segmentfault.com/a/1190000008782928
-https://juejin.cn/post/6844903607913938951
-https://blog.csdn.net/lunahaijiao/article/details/86741739
+## 总结
+
+以上为diff算法的全部过程，可以试着debugger去跟踪diff的过程。
+
+## 参考文章
+
+1. https://segmentfault.com/a/1190000008782928
+2. https://juejin.cn/post/6844903607913938951
+3. https://blog.csdn.net/lunahaijiao/article/details/86741739
