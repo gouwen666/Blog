@@ -263,35 +263,67 @@ newVode.children = `['a', 'e', 'c', 'd', 'b', 'f']`
 
 子节点启动diff前的快照是这样子的：
 
+&emsp;
+
 ![快照1](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot1.png)
+
+&emsp;
 
 1. 当前快照符合“条件3”：oldStartVnode和newStartVnode相同，意味着当前位置的dom没有任何变动，只需要将oldStartVnode和newStartVnode右移一个位置，移动后快照如下：
 
+&emsp;
+
 ![快照2](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot2.png)
+
+&emsp;
 
 2. 当前快照符合“条件7”：newStartVnode在旧树上没有找到，意味着newStartDom是新节点，于是创建新的真实dom，并插入到oldEndVnode之前，同时将newStartVnode右移一个位置。变动后快照如下：
 
+&emsp;
+
 ![快照3](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot3.png)
+
+&emsp;
 
 3. 当前快照符合“条件8”：，newStartVnode在旧树上能够找到相同的节点，意味着只是顺序发生了变化，则将newStartDom从原来的位置移动到当前位置，同时将newStartVnode右移一个位置：
 
+&emsp;
+
 ![快照4](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot4.png)
+
+&emsp;
 
 4. 当前快照符合“条件6”：newStartVnode和oldEndVnode相同，意味着oldEndDom位置发生了变化，则将oldEndDom从原来的位置移动到oldStartDom之前，图示如下：
 
+&emsp;
+
 ![快照5](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot5.png)
+
+&emsp;
 
 5. 当前快照符合“条件2”：在3步处理时，c已经被处理过，并且被置为空，所以直接将oldEndVnode左移
 
+&emsp;
+
 ![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot6.png)
+
+&emsp;
 
 6. 当前快照符合“条件3”：真实dom不需要处理，只需将oldStartVnode和newStartVnode右移一个位置。
 
+&emsp;
+
 ![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot7.png)
+
+&emsp;
 
 7. 因为oldStartVnode超过 oldEndVnode，则退出循环。此时新的子节点还有剩余，则创建其真实dom，添加到dom树上。
 
+&emsp;
+
 ![快照6](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-diff-snapshot8.png)
+
+&emsp;
 
 
 在以上的每一步中，一旦节点相同，还会调用 `patchVnode` 方法，递归去比较新旧相等的两个节点。
