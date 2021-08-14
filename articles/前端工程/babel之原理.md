@@ -43,48 +43,90 @@ Babel转码的过程分三个阶段：解析(parse)、转换(transform)、生成
 + 运算符：用来组成表达式，例如：+、-、*、/等。符号确定
 + 界符：用来划定代码区域，例如：()、{}、,、;等。符号确定
 
-一个词法分析的简单示例：
-
-假设源代码如下：
+举个例子：
 
 ```js
 var name = 'test';
 ```
 
-经过词法分析后：
-```js
-// 定义token如下。
-// 开源的词法分析器对token数据结构的定义各有不同，这个只是为了供大家学习之用。
-let token = {
-    type: '',
-    raw: ''
-}
+词法解析后：
 
-let tokens = [{
-    type: '关键字',
-    raw: 'var'
-},{
-    type: '标识符',
-    raw: 'name'
-},{
-    type: '运算符',
-    raw: '='
-},{
-    type: '常量',
-    raw: 'test'
-},{
-    type: '界符',
-    raw: ';'
-}]
+```js
+var tokens = [
+    {
+        "type": "Keyword",
+        "value": "var"
+    },
+    {
+        "type": "Identifier",
+        "value": "name"
+    },
+    {
+        "type": "Punctuator",
+        "value": "="
+    },
+    {
+        "type": "String",
+        "value": "'test'"
+    },
+    {
+        "type": "Punctuator",
+        "value": ";"
+    }
+];
 ```
 
-有了tokens，语法分析时在遇到 `关键字var` 便处理为声明变量，遇到 `界符;` 处理为声明结束。这就是词法分析的目的所在，为语法分析做准备工作。
+有了tokens，语法分析时在遇到 `Keyword-var` 便处理为声明变量，遇到 `Punctuator-分号` 处理为语句结束。这就是词法分析的目的所在，为语法分析提前准备数据。
 
 #### 语法分析
 
-语法分析：是使用词法分析后的结果，生成语法树（AST）的过程。
+语法分析：是使用词法分析后的产物，生成语法树（AST）的过程。
 
-语法分析树的知识之前已经讲过，在此不加追述了。
+举个例子：
+
+```js
+var name = 'test';
+```
+
+语法分析后：
+
+```js
+var ast = {
+    "type": "Program",
+    "body": [
+        {
+            "type": "VariableDeclaration",
+            "declarations": [
+                {
+                    "type": "VariableDeclarator",
+                    "id": {
+                        "type": "Identifier",
+                        "name": "name"
+                    },
+                    "init": {
+                        "type": "Literal",
+                        "value": "test",
+                        "raw": "'test'"
+                    }
+                }
+            ],
+            "kind": "var"
+        }
+    ],
+    "sourceType": "script"
+}
+```
+
+可以看到一行语句已经形成了树状的结构。
+
+
+
+https://www.babeljs.cn/docs/babel-core
+https://juejin.cn/post/6844903769805701128#heading-2
+https://juejin.cn/post/6844903769805701128#heading-5
+https://github.com/babel/babylon/blob/6.x/README.md
+https://github.com/babel/babylon
+
 
 
 
