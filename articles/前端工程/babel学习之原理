@@ -14,16 +14,85 @@
 
 前端社区中已经有了AST树结构的非官方规范-[estree](https://github.com/estree/estree)，这个规范比较宏观地定义了语法的的结构，并没有跟细致地划分和定义。所以babel基于estree进行了修改，修改后的规范看[这里](https://github.com/babel/babylon/blob/master/ast/spec.md)。
 
-这里提供两个小工具，可以在线看到编译后的语法树：
+这里提供两个小工具，可在线查看解析语法树：
 
 + [astexplorer](https://astexplorer.net/)
 + [esprima](https://esprima.org/demo/parse.html)
 
 如果想要深入学习AST，学习和记忆 `estree` 和 `estree修改版` 是必不可少的步骤。
 
+## 编译过程
+
+Babel转码的过程分三个阶段：解析(parse)、转换(transform)、生成(generate)。
+
+![编译过程](https://raw.githubusercontent.com/gouwen666/Blog/master/images/babel-principle-process.awebp)
+
+### 解析
+
+解析是 `代码生成AST` 的过程。接的过程分两个阶段：词法分析、语法分析。
+
+#### 词法分析
+
+词法分析是从上至下、从左至右逐个字符地扫描源代码，生成一个个单词符号（称之为token）的过程。
+
+词法扫描器扫描源代码，输出：关键字、标识符、常数、运算符、界符。
+
++ 关键字：程序定义的具有特殊含义的标识符，例如：if...else...、class、in、while等。符号确定
++ 标识符：表示各种变量的名字。符号不定
++ 常数：表示各种具体的值，常数都有着其对应的类型：Number、String、Boolean等。符号不定
++ 运算符：用来组成表达式，例如：+、-、*、/等。符号确定
++ 界符：用来划定代码区域，例如：()、{}、,、;等。符号确定
+
+一个词法分析的简单示例：
+
+假设源代码如下：
+
+```js
+var name = 'test';
+```
+
+经过词法分析后：
+```js
+// 定义token如下。
+// 开源的词法分析器对token数据结构的定义各有不同，这个只是为了供大家学习之用。
+let token = {
+    type: '',
+    raw: ''
+}
+
+let tokens = [{
+    type: '关键字',
+    raw: 'var'
+},{
+    type: '标识符',
+    raw: 'name'
+},{
+    type: '运算符',
+    raw: '='
+},{
+    type: '常量',
+    raw: 'test'
+},{
+    type: '界符',
+    raw: ';'
+}]
+```
+
+有了tokens，语法分析时在遇到 `关键字var` 时便处理为声明变量，遇到 `界符;` 时处理为声明结束。这就是词法分析的目的所在，为语法分析做准备。
+
+#### 语法分析
+
+语法分析：是使用词法分析后的结果，生成语法树（AST）的过程。
+
+语法分析树的知识之前已经讲过，在此不加追述了。
+
+### 转换
+
 ## 核心库
 
 ### babylon
+
+babylon是babel的解析器模块，负责完成编译的第一个阶段：`解析`。
 
 [仓库地址](https://github.com/babel/babylon)
 

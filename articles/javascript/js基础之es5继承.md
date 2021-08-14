@@ -1,4 +1,4 @@
-# js深入之继承
+# js基础之继承
 
 + 原型链继承
 + 借用构造函数继承
@@ -29,6 +29,38 @@ child.getName(); // test
 child.getAge(); // 28
 ```
 
+**缺点**
+
+1. 不能向父构造函数传入参数
+
+```js
+...
+function Child() {
+    this.age = 28;
+}
+Child.prototype = new Parent();
+...
+```
+原型继承是放生在构造函数之外，无法传入参数。
+
+2. 污染原型对象的引用类型
+
+```js
+function Parent() {
+    this.obj = {
+        name: 'test'
+    }
+}
+function Child() {}
+Child.prototype = new Parent();
+
+let child1 = new Child();
+let child2 = new Child();
+
+child1.obj.name = 'child1';
+console.log(child2.obj.name); // child1
+```
+
 ## 借用构造函数继承
 
 ```js
@@ -49,6 +81,10 @@ let child = new Child();
 child.getName() // test
 child.getAge() // 28
 ```
+
+**缺点**
+
+原型方法只能在子构造函数上定义，无法复用父构造函数上的原型方法。
 
 ## 组合继承
 
@@ -76,6 +112,8 @@ child.getName(); // 'test'
 child.getAge(); // 28
 ```
 
+融合了原型链继承和借用构造函数继承的优点，既可以给父构造函数传递参数，又可以复用副构造函数上的原型方法。
+
 ## 原型式继承
 
 该继承方式同 Object.create() 相同，这是在已知原型对象前提下从而实现继承的方式。
@@ -101,6 +139,10 @@ obj.getAge = function() {
 }
 obj.getAge(); // 28
 ```
+
+**缺点**
+
+和原型链继承一样，会污染原型对象的引用类型。
 
 ## 寄生式继承
 
@@ -131,6 +173,8 @@ let instance = createObject(origin);
 clone.getName(); // test
 clone.getAge(); // 28
 ```
+
+从对象角度出发，去实现继承，而非构造函数的方式。
 
 ## 寄生组合式继承
 
