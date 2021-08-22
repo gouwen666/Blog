@@ -1,4 +1,4 @@
-# Promise学习之从零实现Promise
+# js实现之Promise
 
 ## 了解需求
 

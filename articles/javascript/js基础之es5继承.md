@@ -212,3 +212,9 @@ child.getAge(); // 28
 child.getName(); // test
 ```
 
+# ES5继承 vs ES6继承
+
+组合式继承和寄生组合式继承都是ES5继承的最佳选择，那么它与ES6继承有什么区别？
+
+1. ES5继承先创建子类的实例this，通过调用Parent.apply(this)再将父类的实例属性和方法添加到this上。
+2. ES6继承先创建父类的实例对象this，再用子类的构造函数修改this。子类构造函数必须调用super()后才能使用this。

@@ -1,12 +1,14 @@
 # js基础之parseInt
 
-## 定义和用法
-
 parseInt函数可解析一个字符串，并返回一个整数。
+
+## 语法
 
 ```js
     let number = parseInt(string, radix)
 ```
+
+## 示例
 
 parseInt还能将其他进制转换成十进制的数字。
 
