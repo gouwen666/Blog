@@ -120,7 +120,7 @@ vue对于data或计算属性会设置getter，这意味着每访问一次，就�
 
 ## 拆分子组件
 
-从这篇 [vue2.0原理之diff算法](https://raw.githubusercontent.com/gouwen666/Blog/master/articles/框架之vue/vue2.0原理之自实现虚拟dom.md) 我们可以了解到 `组件维护着自己的虚拟DOM树`，这意味着，子组件的拆分，可以减少组件渲染的逻辑（diff次数、dom比较等等），从而提升性能。
+从这篇 [vue2.0原理之diff算法](https://raw.githubusercontent.com/gouwen666/Blog/master/articles/框架之vue/vue2.0原理之自实现虚拟dom.md) 我们可以了解到 `组件维护着自己的虚拟DOM树`，这意味着，子组件的拆分，可以减少组件渲染的逻辑（diff次数、dom比较等等），从而提升性能。
 
 **bad**
 
@@ -212,6 +212,8 @@ vue对于data或计算属性会设置getter，这意味着每访问一次，就�
 
 #### 冻结数据
 
+如果确定数据不会发生改变，我们便可以冻结数据。避免响应式处理带来多余的开销。
+
 **bad**
 
 ```vue
@@ -255,6 +257,8 @@ vue对于data或计算属性会设置getter，这意味着每访问一次，就�
 ```
 
 #### 保留关键属性
+
+如果数据经常冰冻，我们只保留渲染依赖的关键数据。
 
 **bad**
 
