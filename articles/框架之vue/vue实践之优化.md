@@ -203,7 +203,58 @@ vue对于data或计算属性会设置getter，这意味着每访问一次，就�
 
 推荐使用[vue-virtual-scroller](https://github.com/Akryum/vue-virtual-scroller)、[vue-virtual-scroll-list](https://github.com/tangbc/vue-virtual-scroll-list);
 
-### 保留关键属性
+### 减少数据过度的响应式处理
+
+我们需要根据实际的应用场景来判断数据是否会发生改变，从而决定使用哪种方式：
+
+    + 数据不会改变，冻结数据
+    + 数据经常变动，保留数据
+
+#### 冻结数据
+
+**bad**
+
+```vue
+    <template>
+        <ul>
+            <li v-for="item in list">{{item.name}}</li>
+        </ul>
+    </template>
+    <script>
+        export default {
+            data() {
+                return {
+                    list: [
+                        ...
+                    ]
+                }
+            }
+        }
+    </script>
+```
+
+**good**
+
+```vue
+    <template>
+        <ul>
+            <li v-for="item in list">{{item.name}}</li>
+        </ul>
+    </template>
+    <script>
+        export default {
+            data() {
+                return {
+                    list: Object.freeze([
+                        ...
+                    ])
+                }
+            }
+        }
+    </script>
+```
+
+#### 保留关键属性
 
 **bad**
 
