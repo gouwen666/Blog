@@ -6,9 +6,7 @@
 
 > Babel Traverse（遍历）模块维护了整棵树的状态，并且负责替换、移除和添加节点。
 
-说明：
-
-ast是描述语法的树型结构的数据，如果我们想 `遍历` ast，并且能够进入 `对应类型` 的处理，我们便可以通过该模块来完成。
+**说明：** ast是描述语法的树型结构的数据，如果我们想 `遍历` ast，并且能够进入 `对应类型` 的处理，我们便可以通过该模块来完成。
 
 ```js
 traverse(ast, {
@@ -54,9 +52,5 @@ traverse(ast, {
 });
 ```
 
-学习babel-traverse最重要的是要掌握 `path对象` 的属性和方法，我认为，最好的方式是看源码的[测试用例](https://github.com/babel/babel/tree/master/packages/babel-traverse/test)。
+学习babel-traverse最重要的是要掌握 `path对象` 的属性和方法，我认为，最好的方式是看源码的 [测试用例](https://github.com/babel/babel/tree/master/packages/babel-traverse/test)。毕竟自动化测试测得是模块的关键部分。
 
-
-
-
-https://github.com/jamiebuilds/babel-handbook/blob/master/translations/zh-Hans/README.md
