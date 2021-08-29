@@ -89,6 +89,60 @@ traverse(ast, {
 
 ## path.get()
 
+该方法返回包含ast节点的属性值的NodePath实例。
+
+**用法：**
+
+```js
+    path.get('expression'); //获取ExpressionStatement节点的expression属性
+    path.get('left'); //获取BinaryExpression节点的left
+```
+
+**示例：**
+
+假设如下代码：
+
+```js
+    num1 === num2;
+```
+
+该代码会生成如下的AST节点：
+
+```js
+    {
+        type: 'ExpressionStatement',
+        expression: {
+            type: 'BinaryExpression',
+            left: {
+                type: 'Identifier',
+                name: 'num1'
+            },
+            right: {
+                type: 'Identifier',
+                name: 'num2'
+            },
+            operator: '==='
+        }
+    }
+```
+
+我们在访问器中访问如下：
+
+```js
+    traverse(ast, {
+        BinaryExpression(path) {
+            console.log(path.get('left'));
+            // 输出：
+            // {key: 'left', node: IdentifierNode, type: 'Identifier', ...pathOtherProps}
+            console.log(path.get('type'));
+            // 输出：
+            // {key: 'type', node: 'BinaryExpression', type: '', ...pathOtherProps}
+        }
+    })
+```
+
+不难发现，返回出来的path对象中，`node` 为值，`key` 为参数，如果node是一个ast节点，`type` 为该节点的类型。
+
 ## path.stop()
 
 该方法可以阻止traverse。
