@@ -13,8 +13,9 @@ ast是描述语法的树型结构的数据，如果我们想 `遍历` ast，并�
 ```
 
 visitors包含：
+
     + 全局访问者：每一个类型都会被该访问者访问。
-    + 特定类型访问者：某种类型的语法节点才会被响应类型的访问者访问。
+    + 特定类型访问者：某种类型的语法节点才会被对应类型的访问者访问。
 
 **示例：**
 
@@ -62,7 +63,7 @@ traverse(ast, {
 });
 ```
 
-文档对于traverse没有细致的讲解和说明，可以通过看源码的 [测试用例](https://github.com/babel/babel/tree/master/packages/babel-traverse/test)
+文档对于traverse没有细致的讲解和说明，我们可以通过看源码的 [测试用例](https://github.com/babel/babel/tree/master/packages/babel-traverse/test) 来学习和了解它。
 
 ## traverse.hasType()
 
@@ -86,6 +87,58 @@ traverse(ast, {
     traverse.hasType(ast, 'ObjectExpression'); // false
 ```
 
+## path.get()
+
+## path.stop()
+
+该方法可以阻止traverse。
+
+**示例：**
+
+```js
+    const code = `
+        function square(n) {
+            return n * n;
+        }
+    `;
+
+    const ast = babylon.parse(code);
+
+    traverse(ast, {
+        Identifier(path) {
+            console.log(path.node.name);
+        }
+    })
+    // 输出：
+    // square
+    // n
+    // n
+    // n
+```
+
+如果加上 path.stop() ,示例如下：
+
+```js
+    const code = `
+        function square(n) {
+            return n * n;
+        }
+    `;
+
+    const ast = babylon.parse(code);
+
+    traverse(ast, {
+        Identifier(path) {
+            console.log(path.node.name);
+            path.stop();
+        }
+    })
+    // 输出：
+    // square
+```
+
+语法树遍历自此停止，stop阻断了后续的所有遍历。
+
 ## path.replaceWith()
 
 该方法可以将语法节点替换成另外一中语法节点
@@ -98,7 +151,7 @@ traverse(ast, {
 
 **示例：**
 
-如果想要将字符串替换为字面量对象：
+如果想要将字符串替换为字面量对象，我们可以这样实现：
 
 ```js
     const code = `
@@ -122,7 +175,6 @@ traverse(ast, {
 
     traverse(ast, {
         VariableDeclarator(path) {
-            debugger
             if(path.node.id.name === 'foo') {
                 path.traverse({
                     StringLiteral(path) {
@@ -135,4 +187,5 @@ traverse(ast, {
 
     generate(ast, {}, code); // {code: "\nvar foo = {\n    num: 233\n};"}
 ```
+
 
