@@ -141,7 +141,12 @@ traverse(ast, {
     })
 ```
 
-不难发现，返回出来的path对象中，`node` 为值，`key` 为参数，如果node是一个ast节点，`type` 为该节点的类型。
+不难发现，返回出来的path对象中：
+
+    + `node` 为值
+    + `key` 为参数
+    + 如果node是一个ast节点，`type` 为该节点的类型。
+    + 其他属性也会根据node是否为ast节点，以及其节点类型而赋有相应的值。
 
 ## path.stop()
 
@@ -241,5 +246,22 @@ traverse(ast, {
 
     generate(ast, {}, code); // {code: "\nvar foo = {\n    num: 233\n};"}
 ```
+
+## path.isType()
+
+isType 不是某个确定的api，之所以这样声明，是为了表达一类判断类型的API，例如：
+
+```js
+    // type：ObjectExpression
+    path.isObjectExpression();
+
+    // type：ObjectProperty
+    path.isObjectProperty();
+
+    // type：Identifier
+    path.isIdentifier();
+```
+
+所有的类型都有其对应的类型判断API。
 
 

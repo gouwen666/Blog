@@ -6,3 +6,33 @@
 
 AST 语法节点是比较复杂的数据结构，该库提供了很多方便的工具函数，使开发人员能够更高效地处理这些节点。
 
+## types.identifier()
+
+该方法创建一个新的 `标识符（Identifier）` 节点。
+
+### 用法：
+
+```js
+    node = types.identifier(name);
+```
+
+### 示例：
+
+创建一个名称为test的变量：
+
+```js
+    testNode = types.identifier('test');
+```
+
+### types.isIdentifier()
+
+该方法判断节点是否为 `标识符（Identifier）` 类型。
+
+### 用法：
+
+```js
+    testNode = types.identifier('test');
+    types.isIdentifier(testNode); // 输出：true
+    types.isIdentifier(testNode, {name: 'test'}); // 输出：true
+    types.isIdentifier(testNode, {name: 'name'}); // 输出：false
+```
