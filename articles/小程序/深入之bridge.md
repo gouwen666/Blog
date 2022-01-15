@@ -1,0 +1,2 @@
+view herajsBridge
+service servicejsBridge
