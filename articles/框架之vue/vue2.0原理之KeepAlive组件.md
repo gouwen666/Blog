@@ -358,20 +358,5 @@ return cache[key];
 
 ```
 
-#### 为什么不能直接创建div的虚拟节点？
-
-```
-...
-cache[key] = h('div', {
-  keepAlive: true
-}, slot);
-...
-keys.push(key);
-return cache[key];
-...
-```
-
-受制于vue渲染的逻辑，keep-alive的节点必须是组件vnode，所以需要多一层组件形态
-
 
 
