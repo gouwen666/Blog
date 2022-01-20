@@ -99,6 +99,10 @@ var KeepAlive = {
 }
 ```
 
+**图解：**
+
+![组件树](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-keepalive.png)
+
 **说明：**
 
 如果 `cache[key]` 存在，则将缓存实例赋值给当前vnode的componentInstance，同时更新 `cache`、`keys` ；如果不存在，则进行缓存。
@@ -107,11 +111,54 @@ var KeepAlive = {
 
 ## 延展
 
-如果要缓存多个组件呢？
+如果缓存多个组件？
 
 **分析：**
 
-从keep-alive组件不难看出，即使有多个子组件，渲染函数也只能返回一个vnode，所以我们需要创造一个组件（或者vnode）来合并所有的子组件，如下：
+从keep-alive组件不难看出：
+
+1. 渲染函数也只能返回一个vnode
+2. 返回出来的组件只能是一个关联组件实例的组件类型的vnode
+
+所以我们需要创造一个组件（或者vnode）来合并所有的子组件，起初我们设计如下：
+
+```javascript
+...
+cache[key] = h('div', {
+  keepAlive: true
+}, slot);
+...
+keys.push(key);
+return cache[key];
+...
+```
+
+运行的时候发现并没有达到预期的效果，最后翻了翻源码，发现了症结所在。
+
+```javascript
+// vue源码
+...
+function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
+  var i = vnode.data;
+  if (isDef(i)) {
+    var isReactivated = isDef(vnode.componentInstance) && i.keepAlive;
+    if (isDef(i = i.hook) && isDef(i = i.init)) {
+      i(vnode, false /* hydrating */);
+    }
+    if (isDef(vnode.componentInstance)) {
+      initComponent(vnode, insertedVnodeQueue);
+      insert(parentElm, vnode.elm, refElm);
+      if (isTrue(isReactivated)) {
+        reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm);
+      }
+      return true
+    }
+  }
+}
+...
+```
+
+创建组件时，vnode不是元素类型的vnode，而是一个存在于 `父组件虚拟DOM树` 中的一个 `组件类型`  vnode，通过它的 `componentInstance` 可以直接找到子组件的实例，因此必须创建一个组件类型的vnode，修改如下：
 
 ```javascript
 ...
@@ -127,6 +174,12 @@ keys.push(key);
 return cache[key];
 ...
 ```
+
+**图解：**
+
+![组件树](https://raw.githubusercontent.com/gouwen666/Blog/master/images/vue2.0-keepmultialive.png)
+
+**源码：**
 
 最终实现组件实现如下，我们将这个组件命名为 `KeepMultiAlive`:
 
@@ -304,6 +357,21 @@ return cache[key];
 </script>
 
 ```
+
+#### 为什么不能直接创建div的虚拟节点？
+
+```
+...
+cache[key] = h('div', {
+  keepAlive: true
+}, slot);
+...
+keys.push(key);
+return cache[key];
+...
+```
+
+受制于vue渲染的逻辑，keep-alive的节点必须是组件vnode，所以需要多一层组件形态
 
 
 
